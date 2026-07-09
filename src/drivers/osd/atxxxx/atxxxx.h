@@ -51,6 +51,9 @@
 #include <uORB/topics/battery_status.h>
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/vehicle_status.h>
+#include <uORB/topics/vehicle_attitude.h>
+#include <uORB/topics/sensor_gps.h>
+#include <uORB/topics/home_position.h>
 
 #define OSD_SPI_BUS_SPEED (2000000L) /*  2 MHz  */
 
@@ -95,8 +98,11 @@ private:
 	void clear_line(uint8_t pos_x, uint8_t pos_y, int length);
 
 	int add_battery_info(uint8_t pos_x, uint8_t pos_y);
+	int add_attitude(uint8_t pos_x, uint8_t pos_y);
+	int add_lon_lat(uint8_t pos_x, uint8_t pos_y);
 	int add_altitude(uint8_t pos_x, uint8_t pos_y);
 	int add_flighttime(float flight_time, uint8_t pos_x, uint8_t pos_y);
+	int add_home_state(uint8_t pos_x, uint8_t pos_y);
 
 	static const char *get_flight_mode(uint8_t nav_state);
 
@@ -109,11 +115,24 @@ private:
 	uORB::Subscription _battery_sub{ORB_ID(battery_status)};
 	uORB::Subscription _local_position_sub{ORB_ID(vehicle_local_position)};
 	uORB::Subscription _vehicle_status_sub{ORB_ID(vehicle_status)};
+	uORB::Subscription _vehicle_attitude_sub{ORB_ID(vehicle_attitude)};
+	uORB::Subscription _gps_sub{ORB_ID(sensor_gps)};
+	uORB::Subscription _home_position_sub{ORB_ID(home_position)};
 
 	// battery
 	float _battery_voltage_v{0.f};
 	float _battery_discharge_mah{0.f};
 	bool _battery_valid{false};
+
+	//attitude
+	float _roll_deg{0.f};
+	float _pitch_deg{0.f};
+	bool _attitude_valid{false};
+
+	//gps lat lon
+	int32_t _lat_deg{0};
+	int32_t _lon_deg{0};
+	bool _gps_valid{false};
 
 	// altitude
 	float _local_position_z{0.f};
@@ -125,6 +144,13 @@ private:
 
 	// flight mode
 	uint8_t _nav_state{0};
+
+	// home position
+	bool _home_position_valid{false};
+	int32_t _dist_to_home_m{0};
+	int32_t _bearing_deg{0};
+	double _home_lat_deg{0.0};
+	double _home_lon_deg{0.0};
 
 	DEFINE_PARAMETERS(
 		(ParamInt<px4::params::OSD_ATXXXX_CFG>) _param_osd_atxxxx_cfg

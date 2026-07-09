@@ -42,6 +42,11 @@
 #include "atxxxx.h"
 #include "symbols.h"
 
+#include <lib/geo/geo.h>
+
+using matrix::wrap_pi;
+using matrix::wrap_2pi;
+
 using namespace time_literals;
 
 static constexpr uint32_t OSD_UPDATE_RATE{50_ms};	// 20 Hz
@@ -266,6 +271,88 @@ OSDatxxxx::add_battery_info(uint8_t pos_x, uint8_t pos_y)
 }
 
 int
+OSDatxxxx::add_attitude(uint8_t pos_x, uint8_t pos_y)
+{
+	int ret = PX4_OK;
+	char temp[12];
+	const uint8_t NUM_WIDTH = 6;
+	char num_buf[NUM_WIDTH + 1];
+
+
+	ret |= add_character_to_screen('R', pos_x, pos_y);
+	ret |= add_character_to_screen(':', pos_x + 1, pos_y);
+
+	snprintf(temp, sizeof(temp), "%+4.1f", (double)_roll_deg);
+	snprintf(num_buf, sizeof(num_buf), "%*s", NUM_WIDTH, temp);
+
+	for (int i = 0; i < NUM_WIDTH; i++) {
+		ret |= add_character_to_screen(num_buf[i], pos_x + 2 + i, pos_y);
+	}
+
+	pos_y++;
+
+	ret |= add_character_to_screen('P', pos_x, pos_y);
+	ret |= add_character_to_screen(':', pos_x + 1, pos_y);
+
+	snprintf(temp, sizeof(temp), "%+4.1f", (double)_pitch_deg);
+	snprintf(num_buf, sizeof(num_buf), "%*s", NUM_WIDTH, temp);
+	for (int i = 0; i < NUM_WIDTH; i++) {
+		ret |= add_character_to_screen(num_buf[i], pos_x + 2 + i, pos_y);
+	}
+
+	return ret;
+}
+
+int
+OSDatxxxx::add_lon_lat(uint8_t pos_x, uint8_t pos_y)
+{
+	char buf[16];
+	int ret = PX4_OK;
+	snprintf(buf, sizeof(buf), "%c%d", OSD_SYMBOL_SAT_L, (int)_lat_deg);
+	buf[sizeof(buf) - 1] = '\0';
+
+	for (int i = 0; buf[i] != '\0'; i++) {
+		ret |= add_character_to_screen(buf[i], pos_x + i, pos_y);
+	}
+
+	pos_y++;
+	pos_x++;
+
+	snprintf(buf, sizeof(buf), "%d", (int)_lon_deg);
+	buf[sizeof(buf) - 1] = '\0';
+
+	for (int i = 0; buf[i] != '\0'; i++) {
+		ret |= add_character_to_screen(buf[i], pos_x + i, pos_y);
+	}
+	return ret;
+}
+
+int
+OSDatxxxx::add_home_state(uint8_t pos_x, uint8_t pos_y)
+{
+	char buf[16];
+	int ret = PX4_OK;
+	snprintf(buf, sizeof(buf), "%c%3d", OSD_SYMBOL_HEADING_N, (int)_bearing_deg);
+	buf[sizeof(buf) - 1] = '\0';
+
+	for (int i = 0; buf[i] != '\0'; i++) {
+		ret |= add_character_to_screen(buf[i], pos_x + i, pos_y);
+	}
+
+	pos_y++;
+	// pos_x++;
+
+	snprintf(buf, sizeof(buf), "%c%5d", OSD_SYMBOL_HOME, (int)_dist_to_home_m);
+	buf[sizeof(buf) - 1] = '\0';
+
+	for (int i = 0; buf[i] != '\0'; i++) {
+		ret |= add_character_to_screen(buf[i], pos_x + i, pos_y);
+	}
+	ret |= add_character_to_screen(OSD_SYMBOL_M, pos_x + 5, pos_y);
+	return ret;
+}
+
+int
 OSDatxxxx::add_altitude(uint8_t pos_x, uint8_t pos_y)
 {
 	char buf[16];
@@ -339,6 +426,38 @@ OSDatxxxx::update_topics()
 		}
 	}
 
+	/* update vehicle attitude subscription */
+	if (_vehicle_attitude_sub.updated()) {
+		vehicle_attitude_s vehicle_attitude{};
+		_vehicle_attitude_sub.copy(&vehicle_attitude);
+		_attitude_valid = true;
+		Quatf q_att(vehicle_attitude.q);
+		Eulerf euler(q_att);
+		_roll_deg = euler.phi() * 57.29578f;
+		_pitch_deg = euler.theta() * 57.29578f;
+	}
+
+	/* update gps subscription */
+	if(_gps_sub.updated()){
+		sensor_gps_s gps{};
+		_gps_sub.copy(&gps);
+		// once valid
+		if(gps.fix_type > 2){
+			_gps_valid = true;
+		}
+		_lat_deg = static_cast<int32_t>(gps.latitude_deg * 1e7);
+		_lon_deg = static_cast<int32_t>(gps.longitude_deg * 1e7);
+
+		if(_home_position_valid){
+
+			float dist_to_home = get_distance_to_next_waypoint(gps.latitude_deg, gps.longitude_deg, _home_lat_deg, _home_lon_deg);
+			_dist_to_home_m = static_cast<int32_t>(dist_to_home);
+			float bearing = get_bearing_to_next_waypoint(_home_lat_deg, _home_lon_deg, gps.latitude_deg, gps.longitude_deg);
+			float bearing_2pi = wrap_2pi(bearing);
+			_bearing_deg = static_cast<int32_t>(math::degrees(bearing_2pi));
+		}
+	}
+
 	/* update vehicle local position subscription */
 	if (_local_position_sub.updated()) {
 		vehicle_local_position_s local_position{};
@@ -368,6 +487,18 @@ OSDatxxxx::update_topics()
 
 		_arming_state = vehicle_status.arming_state;
 		_nav_state = vehicle_status.nav_state;
+	}
+
+	/* update home position */
+
+	if(_home_position_sub.updated()) {
+		home_position_s home_position{};
+		_home_position_sub.copy(&home_position);
+		if(home_position.valid_hpos){
+			_home_position_valid = true;
+			_home_lat_deg = home_position.lat;
+			_home_lon_deg = home_position.lon;
+		}
 	}
 
 	return PX4_OK;
@@ -421,7 +552,8 @@ OSDatxxxx::get_flight_mode(uint8_t nav_state)
 		break;
 
 	case vehicle_status_s::NAVIGATION_STATE_OFFBOARD:
-		flight_mode = "OFFBOARD";
+		// flight_mode = "OFFBOARD";
+		flight_mode = "ATTACK";
 		break;
 
 	case vehicle_status_s::NAVIGATION_STATE_STAB:
@@ -452,15 +584,36 @@ OSDatxxxx::update_screen()
 		clear_line(1, 3, 10);
 	}
 
+	if (_attitude_valid) {
+		ret |= add_attitude(1, 4);
+	} else {
+		clear_line(1, 4, 12);
+		clear_line(1, 5, 12);
+	}
+
+	if(_gps_valid){
+		ret |= add_lon_lat(1, 6);
+	} else {
+		clear_line(1, 6, 12);
+		clear_line(1, 7, 12);
+	}
+
+	if(_home_position_valid){
+		ret |= add_home_state(1,8);
+	} else {
+		clear_line(1, 8, 12);
+		clear_line(1, 9, 12);
+	}
+
 	const char *flight_mode = "";
 
-	if (_arming_state == vehicle_status_s::ARMING_STATE_ARMED) {
-		float flight_time_sec = static_cast<float>((hrt_absolute_time() - _arming_timestamp) / (1e6f));
-		ret |= add_flighttime(flight_time_sec, 1, 14);
+	// if (_arming_state == vehicle_status_s::ARMING_STATE_ARMED) {
+	// 	float flight_time_sec = static_cast<float>((hrt_absolute_time() - _arming_timestamp) / (1e6f));
+	// 	ret |= add_flighttime(flight_time_sec, 1, 14);
 
-	} else {
-		flight_mode = get_flight_mode(_nav_state);
-	}
+	// } else {
+	// 	flight_mode = get_flight_mode(_nav_state);
+	// }
 
 	add_string_to_screen_centered(flight_mode, 12, 10);
 

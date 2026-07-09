@@ -71,6 +71,9 @@ publications:
   - topic: /fmu/out/airspeed_validated
     type: px4_msgs::msg::AirspeedValidated
 
+  - topic: /fmu/out/input_rc
+    type: px4_msgs::msg::InputRc
+
 # Create uORB::Publication
 subscriptions:
   - topic: /fmu/in/register_ext_component_request
@@ -150,6 +153,9 @@ subscriptions:
 
   - topic: /fmu/in/aux_global_position
     type: px4_msgs::msg::VehicleGlobalPosition
+
+  - topic: /fmu/in/vehicle_los_status
+    type: px4_msgs::msg::VehicleLosStatus
 
 # Create uORB::PublicationMulti
 subscriptions_multi:

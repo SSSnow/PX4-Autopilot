@@ -13,21 +13,39 @@ then
 	reboot
 fi
 
-param set-default BAT1_V_DIV 11.2
-param set-default BAT1_A_PER_V 59.5
-
 # system_power unavailable
 param set-default CBRK_SUPPLY_CHK 894281
 
-# Select the Generic 250 Racer by default
-param set-default SYS_AUTOSTART 4050
+# Select the kakutah7 s7 by default
+param set-default SYS_AUTOSTART 4100
 
 # use EKF2 without mag
 param set-default SYS_HAS_MAG 0
-# and enable gravity fusion
-param set-default EKF2_IMU_CTRL 7
+param set-default SYS_HAS_GPS 1 # for test gps velocity
+param set-default EKF2_GPS_CTRL 0 # for test gps velocity
 
 # the startup tune is not great on a binary output buzzer, so disable it
 param set-default CBRK_BUZZER 782090
 
 param set-default IMU_GYRO_RATEMAX 2000
+param set-default IMU_GYRO_FFT_EN 1
+
+# Configure MAVLINK
+# TELEM1 ttyS1
+param set-default MAV_0_CONFIG 101
+param set-default MAV_0_MODE 0
+param set-default SER_TEL1_BAUD 57600
+
+# configure DDS use TEL2-ttyS2 (UART3)
+# Congfigure OSD
+param set-default OSD_ATXXXX_CFG 1
+param set-default UXRCE_DDS_CFG 102
+param set-default SER_TEL2_BAUD 921600
+
+# Configure Battery
+param set-default BAT1_N_CELLS 6
+param set-default BAT1_V_CHARGED 4.2
+param set-default BAT1_V_EMPTY 3.3
+param set-default BAT1_V_DIV 11.2
+param set-default BAT1_A_PER_V 59.5
+

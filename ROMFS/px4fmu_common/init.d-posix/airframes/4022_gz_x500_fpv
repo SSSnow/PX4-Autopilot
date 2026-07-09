@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+# @name Gazebo x500 fpv
+#
+# @type Quadrotor
+#
+
+PX4_SIM_MODEL=${PX4_SIM_MODEL:=x500_fpv}
+
+. ${R}etc/init.d-posix/airframes/4001_gz_x500
+
+# DDS parameters
+
+#use gazebo clock for synchronization
+param set-default UXRCE_DDS_SYNCT 0

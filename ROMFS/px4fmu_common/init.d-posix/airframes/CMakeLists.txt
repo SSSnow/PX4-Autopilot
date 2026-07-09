@@ -88,6 +88,8 @@ px4_add_romfs_files(
 	4019_gz_x500_gimbal
 	4020_gz_tiltrotor
 	4021_gz_x500_flow
+	4022_gz_x500_fpv
+	4030_gz_mosquito
 
 	5001_xplane_cessna172
 	5002_xplane_tb2

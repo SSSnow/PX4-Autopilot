@@ -1,0 +1,76 @@
+#!/bin/sh
+#
+# @name kakutah7_s10
+#
+# @type Quadrotor x
+# @class Copter
+#
+# @maintainer neil
+#
+
+. ${R}etc/init.d/rc.mc_defaults
+
+# Configure Battery
+param set-default BAT1_N_CELLS 6
+param set-default BAT1_V_CHARGED 4.2
+param set-default BAT1_V_EMPTY 3.3
+
+
+# Configure Commander
+param set-default COM_RC_IN_MODE 0
+param set-default COM_FLTMODE1 1
+param set-default COM_FLTMODE3 2
+param set-default COM_FLTMODE6 6
+
+# Configure RC Switch
+param set-default RC_MAP_FLTMODE 5
+param set-default RC_MAP_ARM_SW 6
+param set-default RC_MAP_KILL_SW 11
+
+
+# Configure actuator Outputs
+param set-default PWM_MAIN_TIM0 -3
+param set-default PWM_MAIN_TIM1 -3
+param set-default PWM_MAIN_FUNC1 104
+param set-default PWM_MAIN_FUNC2 101
+param set-default PWM_MAIN_FUNC3 102
+param set-default PWM_MAIN_FUNC4 103
+
+# Congfigure OSD
+param set-default OSD_ATXXXX_CFG 1
+
+# Configure MPC
+param set-default MPC_THR_HOVER 0.3
+
+# Square quadrotor X PX4 numbering
+param set-default CA_ROTOR_COUNT 4
+param set-default CA_ROTOR0_PX 1
+param set-default CA_ROTOR0_PY 1
+param set-default CA_ROTOR1_PX -1
+param set-default CA_ROTOR1_PY -1
+param set-default CA_ROTOR2_PX 1
+param set-default CA_ROTOR2_PY -1
+param set-default CA_ROTOR2_KM -0.05
+param set-default CA_ROTOR3_PX -1
+param set-default CA_ROTOR3_PY 1
+param set-default CA_ROTOR3_KM -0.05
+
+# Configure MAVLINK
+# TELEM1 ttyS1
+param set-default MAV_0_CONFIG 101
+param set-default MAV_0_MODE 0
+param set-default SER_TEL1_BAUD 57600
+
+# configure DDS use TEL2-ttyS2 (UART3)
+param set-default UXRCE_DDS_CFG 102
+param set-default SER_TEL2_BAUD 921600
+
+# set rate controller
+param set-default MC_ROLLRATE_P 0.12
+param set-default MC_ROLLRATE_D 0.001
+param set-default MC_PITCHRATE_P 0.18
+
+# set attitude controller
+param set-default MC_ROLL_P 8.0
+param set-default MC_PITCH_P 8.0
+

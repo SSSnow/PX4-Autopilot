@@ -1,0 +1,66 @@
+#!/bin/sh
+#
+# @name kakutah7_s7
+#
+# @type Quadrotor x
+# @class Copter
+#
+# @maintainer neil
+#
+
+. ${R}etc/init.d/rc.mc_defaults
+
+
+# Configure Commander
+param set-default COM_RC_IN_MODE 0
+param set-default COM_FLTMODE1 0
+param set-default COM_FLTMODE4 1
+param set-default COM_FLTMODE6 6
+
+# Configure RC Switch
+param set-default RC_INPUT_PROTO 6
+param set-default RC_MAP_FLTMODE 6
+param set-default RC_MAP_ARM_SW 5
+
+# Configure actuator Outputs
+param set-default PWM_MAIN_TIM0 -3
+param set-default PWM_MAIN_TIM1 -3
+param set-default PWM_MAIN_FUNC1 104
+param set-default PWM_MAIN_FUNC2 101
+param set-default PWM_MAIN_FUNC3 102
+param set-default PWM_MAIN_FUNC4 103
+
+# Configure MPC
+param set-default MPC_THR_HOVER 0.2
+param set-default MPC_ALT_MODE 0
+param set-default MPC_Z_VEL_MAX_UP 5.0
+param set-default MPC_Z_VEL_MAX_DN 3.0
+param set-default MPC_Z_VEL_P_ACC 4.5
+param set-default MPC_MAN_TILT_MAX 50
+param set-default MPC_TILTMAX_AIR 75
+
+# Square quadrotor X PX4 numbering
+param set-default CA_ROTOR_COUNT 4
+param set-default CA_ROTOR0_PX 1
+param set-default CA_ROTOR0_PY 1
+param set-default CA_ROTOR1_PX -1
+param set-default CA_ROTOR1_PY -1
+param set-default CA_ROTOR2_PX 1
+param set-default CA_ROTOR2_PY -1
+param set-default CA_ROTOR2_KM -0.05
+param set-default CA_ROTOR3_PX -1
+param set-default CA_ROTOR3_PY 1
+param set-default CA_ROTOR3_KM -0.05
+
+
+# set rate controller
+param set-default MC_ROLLRATE_P 0.12
+param set-default MC_ROLLRATE_D 0.001
+param set-default MC_PITCHRATE_P 0.15
+param set-default MC_PITCHRATE_D 0.0015
+
+# set attitude controller
+param set-default MC_ROLL_P 8.0
+param set-default MC_PITCH_P 8.0
+
+

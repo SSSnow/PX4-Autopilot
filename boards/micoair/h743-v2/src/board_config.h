@@ -149,7 +149,14 @@
 #define BOARD_ENABLE_CONSOLE_BUFFER
 
 
-#define BOARD_NUM_IO_TIMERS 5
+#define BOARD_NUM_IO_TIMERS 4
+
+#define BOARD_HAS_N_S_RGB_LED       10
+#define BOARD_MAX_LEDS              BOARD_HAS_N_S_RGB_LED
+#define S_RGB_LED_DMA               DMAMAP_DMA12_TIM4CH3_0
+#define S_RGB_LED_TIMER             4   /* timer 3    */
+#define S_RGB_LED_CHANNEL           3   /* channel 4  */
+#define S_RGB_LED_TIM_GPIO          GPIO_TIM4_CH3OUT_2
 
 
 __BEGIN_DECLS

@@ -48,3 +48,4 @@ param set-default BAT1_V_CHARGED 4.2
 param set-default BAT1_V_DIV 21.12
 param set-default BAT1_V_EMPTY 3.2
 
+neopixel -n 10

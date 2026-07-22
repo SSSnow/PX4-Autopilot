@@ -151,7 +151,7 @@
 
 #define BOARD_NUM_IO_TIMERS 4
 
-#define BOARD_HAS_N_S_RGB_LED       10
+#define BOARD_HAS_N_S_RGB_LED       8
 #define BOARD_MAX_LEDS              BOARD_HAS_N_S_RGB_LED
 #define S_RGB_LED_DMA               DMAMAP_DMA12_TIM4CH3_0
 #define S_RGB_LED_TIMER             4   /* timer 3    */
